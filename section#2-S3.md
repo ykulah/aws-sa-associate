@@ -113,7 +113,8 @@ Bucket policy: this works on entire bucket level
 
 ```mermaid
 graph LR;
-    S3_Standard--> S3_Infrequent_Access --> S3_Glacier;
+    S3_Standard --> S3_Infrequent_Access;
+    S3_Infrequent_Access --> S3_Glacier;
 ```
 
 **[Tip]** Automates moving objects between different storage tiers
