@@ -122,3 +122,98 @@ graph LR;
 **[Tip]** Can be using in conjuction with versioning
 
 **[Tip]** Can be applied to current versions and previous versions, if versioning is enabled.
+
+----
+
+## Object locking S3 and Glacier
+
+### S3 Object lock:
+- object lock using WORM model
+- WORM: write oqnce, read many times
+
+#### Governance 
+- mode: user cannot overwrite or delete an object version or alter its lock settings
+- some of users can be granted permission to alter retention settings
+
+#### Compliance Mode
+- Protected object version cant be overwritten or deleted by any users
+- retention period cannot be changed
+- even root user cannot update these objects
+
+#### Legal holds:
+- prevents and object version from being overwritten or deleted
+- permission is `s3:PutObjectLegalHold`
+- Legal hold can be put/removed by any user
+- legal hold is not associated retention period
+
+### Glacier Vault Lock
+
+Way of applying **WORM** model in glacier
+
+**[Tip]** S3 Object lock to store objects using WORM model
+
+**[Tip]** Object lock can be on individual objects or applied across the bucket
+
+**[Tip]** Object Lock comes in two modes: governance mode and compliance mode.
+
+**[Tip]** S3 Glacier vault lock
+- easy deploy and enforce compliance controls
+- specify controls in vault lock policty and lock the policy from future edits 
+- once locked, can no longer be changed.
+
+-----
+
+## S3 Bucket Encyrption
+
+- Can be enforced via bucket policy
+  - bucket policy can deny all `PUT` requests that dont include the `x-ams-server-side-encryption` parameter in request header.
+### Types of encryption
+- in transit:
+  - SSL/TLS
+  - HTTPS
+- encryption at rest: server side enctrption
+  - SSE-S3: s3 managed keys, AES-256bit
+  - SSE-KMS: KMS managed keys
+  - SSE-C: Customer provided keys
+- encryption at rest: client side enctrption
+  - encrypt files before uploading to s3. 
+
+----
+## Optimize S3 Performance
+
+User can get first byte within 100-200 ms. `PUT/COPY/POST/DELETE` 3500 req/sec, `GET/HEAD` 5500 req/sec
+
+1. Better performance by spreading reads across different prefixes.
+2. If we put same file to 4 different location, we can place 22000 req/sec `GET` request
+
+### Limitations
+- SSE-KMS has its own limits for encrpytion/decryption
+- KMS has quota and cannot be increased, either 5500, 10000 or 30000 req/sec
+- KMS performance is not equal accross regions
+
+### Multipart Uploads
+- Recommended for files over 100 MB
+- REquired for files over 5 GB
+
+### Downloads
+- S3 Byte-Range Fetches: kind of multi-part download
+- if there is failure, it is only for a specific byte range
+- Download version of multi-part-upload
+
+----
+
+## Back-up data with S3 Replication
+
+1. Replicate objects from one bucket to another
+2. Objects in an existing bucket are not replicated automatically
+   1. once turned on, all subseruqnet objects will be replicated automatically
+3. by default delete markers are not replicated by default 
+   - versioning must be enabled, in both source and destination bucket
+  
+4. Storage class of replicated bucket can be different (to save some money)
+
+**[Tip]** Replicate objects from one bucket to another
+
+**[Tip]** Objects in exsiting bucket are not replicated automatically
+
+**[Tip]** Delete markers are not replicated by default, but can be configured so.
