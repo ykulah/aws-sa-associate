@@ -33,7 +33,7 @@ When to use:
   - on-demand: can be paid hourly
   - licensing: that does not support multi-tenancy or cloud deployments (e.g. legacy app licenses)
   - reserved: can be purchased as reserverd to save cost upto 70%
-
+  - *Tip*: Any question that talks about special licensing req, first option is always dedicated instances.
 -----
  ## Security Groups
  1. Changes take effeect immediately
@@ -56,5 +56,52 @@ To check values: `curl http://<ip>/latest/metadata/<meta-data-id>`
 User data: `curl http://<ip>/latest/user-data` -> this contains bootstrap script.
 
 **[Tip]** User data is bootstrap script
+
 **[Tip]** Metadata is data bout ec2 instances
+
 **[Tip]** You can use bootstrap scripts (user data) to access metadata
+
+
+----
+
+## EC2 Networking
+
+1. ENI - Elastik Network Interface
+    - create a management netowkr
+    - use network and security appliance in vpc
+    - create dual-homed instance with workloads/roles on distinct subnets
+    - low budget, high availability solution
+2. EN - Enhanced networking -> high perf
+   - 10Gbps to 100 Gbps
+   - Lower inter-instance latency
+   - It can be enabled using ENA(Elastic Network Adapter) or Intel 82500 Virtual function interface
+   - ENA supports upto 100Gbps
+   - Intel VF interface is for older machines.
+   - preference is always for ENA 
+3. EFA - Elastic fabric adapter -> HPC
+   - to accelerate HPC and manchine leranring apps
+   - lower latency
+   - EFA can use os-bypass, only supported with linux 
+   - os-bypass is bypass kernel and allow application to communicate with device directly.
+
+**[Tip]** General knowledge for exam is okay.
+
+-----
+
+## Optimize EC2 with placement groups
+
+1. Cluster
+   - grouping in singe AZ
+   - low network latency, high troughput
+2. Spread
+   - each placed on distinct underlying hardware
+3. Partition
+   - partitions are placed in different racks of server
+   - no 2 partition shared same rack
+   - e.g. HDFS, Cassandra etc.
+    
+**[Tip]** AWS recommends have the same device type in a paritition group
+
+**[Tip]** Placement groups cannot be merged
+
+**[Tip]** Existing instance can be moved into placement group, if the instance status is **STOPPED**
