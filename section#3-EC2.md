@@ -91,13 +91,15 @@ User data: `curl http://<ip>/latest/user-data` -> this contains bootstrap script
 ## Optimize EC2 with placement groups
 
 1. Cluster
-   - grouping in singe AZ
+   - grouping in single AZ
    - low network latency, high troughput
 2. Spread
    - each placed on distinct underlying hardware
+   - can utilize multiple AZs
 3. Partition
    - partitions are placed in different racks of server
    - no 2 partition shared same rack
+   - can utilize multiple AZs
    - e.g. HDFS, Cassandra etc.
     
 **[Tip]** AWS recommends have the same device type in a paritition group
@@ -105,3 +107,80 @@ User data: `curl http://<ip>/latest/user-data` -> this contains bootstrap script
 **[Tip]** Placement groups cannot be merged
 
 **[Tip]** Existing instance can be moved into placement group, if the instance status is **STOPPED**
+
+----
+## Timing Workloads with Spot instances and Spot fleets
+
+- Instance is provisions as long as spot price is below your max spot price (bid)
+- hourly spot price varies depending on capacity and region
+- if spot price goes above your max, you have 2 minutes to decide what to do, stop or terminate instances
+  
+
+### Spot Blocks: 
+
+to stop your spot instances from being terminated if spot price goes over your bid.
+- spot blocks for between 1 to 6 hours currently
+
+-> price history of spot instances is available
+
+spot is useful when
+- big data and analytics
+- containerized workloads
+- ci/cd and testing
+- image and media rendering
+- high-perf computing (in exam, spots questions are coming from this context)
+
+
+not useful (as it can be terminated)
+- persistent workloads
+- critical jobs
+- databases
+
+
+### Terminating Spot Instances
+
+Spot instances can be requested either _one time_ or _persistent_
+
+_one time_: 
+-  terminate from console is okay
+
+_persistent_:
+- just terminate instance wont work as the spot instance request is there. 
+- we need to cancel the persistent request frim console.
+- otherwise, it will continue to provision if bid price is higher then spot price.
+
+### Spot Fleets
+
+Collection of spot instances and (optionally) on-demand instances
+
+Sport fleet will try to match the target capacity with your price restraints
+1. setup different launch pools. define like ec2 instance types in different AZs
+2. can have multiple pools and the fleet will choose the best wat to implement depending on the strategy
+3. spot fellets will stop launching instances once you reach your price threshold or desired capacity.
+
+Launch Pool Types:
+1. `capacityOptimized`: come from the pool with optimal capacity for the number of instance launching
+2. `lowestPrice`:  come from the pool with lowest price, this is the _default_ strategy.
+3. `diversified`: instances distributed across all pools
+4. `InstancePoolsToUseCount`: instances are distributed across the number of spot instance pools you specify. This is valid only when used in combination with `lowestPrice`
+
+**[Tip]** saving upto 90%
+
+**[Tip]** useful when persistent storage is not needed
+
+**[Tip]** block spot instances from termination by using **Spot block**
+
+**[Tip]** A Spot Fleet is a collection of Spot Instances and (optionally) on-demand instances
+
+
+-----
+
+## Overview
+
+#### Pricing Options
+- On-demand: pay by the hour/second
+- Spot: unused capacity of AWS, up to 90% discount. great for apss with flexible start/end times
+- Reserved: capacity for 1 to 3 years. save upto 70%
+- Dedicated: physical ec2 instance dedicated for you, can be compliancy req.
+
+
